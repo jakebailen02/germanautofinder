@@ -1,1 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GermanAutoFinder — NJ · NY · CT</title>
+<meta name="description" content="Live German car listings across New Jersey, New York, and Connecticut. BMW, Mercedes, Audi, Porsche, VW, and MINI — searched live with sold-car tracking.">
+<meta property="og:title" content="GermanAutoFinder">
+<meta property="og:description" content="Live German car listings · Tri-State · NJ NY CT">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:#FAFAF8;color:#111;font-family:'Barlow',sans-serif;font-weight:400;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
+:root{
+  --bg:#FAFAF8;--dark:#0F0F0F;--mid:#2A2A2A;--muted:#6B7280;--light-muted:#9CA3AF;
+  --border:#E4E4E7;--border-h:#A1A1AA;--card:#FFFFFF;--surface:#F4F4F5;
+  --accent:#CC2200;--accent-light:#FFF0EE;
+  --r:8px;--rl:12px;--fd:'Barlow Condensed',sans-serif;
+}
 
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.nav-i{max-width:1260px;margin:0 auto;padding:0 clamp(1rem,4vw,2rem);display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{font-family:var(--fd);font-size:21px;font-weight:900;letter-spacing:-0.5px;color:var(--dark);text-decoration:none;}
+.logo-r{color:var(--accent);}
+.logo-l{font-weight:300;}
+.nav-tag{font-size:11px;font-weight:600;letter-spacing:0.1em;padding:4px 10px;border:1px solid var(--border);border-radius:4px;color:var(--muted);text-transform:uppercase;}
+
+/* HERO */
+.hero{background:var(--dark);padding:clamp(3.5rem,10vh,7rem) clamp(1rem,4vw,2rem);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-60deg,transparent,transparent 60px,rgba(255,255,255,.016) 60px,rgba(255,255,255,.016) 61px);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(204,34,0,.5),transparent);}
+.hero-i{max-width:1260px;margin:0 auto;position:relative;}
+.hero-eye{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;}
+.hero-eye::before{content:'';width:24px;height:2px;background:var(--accent);}
+h1.ht{font-family:var(--fd);font-size:clamp(60px,9.5vw,110px);font-weight:900;line-height:0.87;color:#fff;letter-spacing:-2px;margin-bottom:28px;}
+h1.ht .a{color:var(--accent);}
+.hdesc{font-size:clamp(14px,1.8vw,17px);font-weight:300;color:rgba(255,255,255,0.5);max-width:540px;line-height:1.7;margin-bottom:36px;}
+.hdesc strong{color:rgba(255,255,255,0.75);font-weight:500;}
+.hbrands{display:flex;flex-wrap:wrap;gap:7px;}
+.hbrand{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:6px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:rgba(255,255,255,0.35);}
+
+/* SECTION */
+.sec{max-width:1260px;margin:0 auto;padding:3rem clamp(1rem,4vw,2rem);}
+.seye{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.stitle{font-family:var(--fd);font-size:clamp(30px,4vw,44px);font-weight:900;letter-spacing:-0.5px;color:var(--dark);margin-bottom:1.75rem;}
+
+/* PROXY NOTICE */
+.proxy-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.proxy-notice.ok{background:#F0FDF4;border-color:#BBF7D0;color:#166534;}
+.proxy-notice.warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E;}
+
+/* BRAND TABS */
+.btabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;}
+.btab{font-family:var(--fd);font-size:14px;font-weight:700;letter-spacing:0.04em;padding:7px 16px;border-radius:var(--r);cursor:pointer;transition:all .15s;border:1.5px solid var(--border);background:transparent;color:var(--muted);}
+.btab:hover{border-color:var(--border-h);color:var(--dark);}
+.btab.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+/* FILTERS */
+.fcard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1.25rem;}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:16px;}
+.fg label{display:block;font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--light-muted);margin-bottom:6px;}
+.fg input[type=text],.fg select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-family:'Barlow',sans-serif;font-size:13px;color:var(--dark);background:var(--bg);transition:border .15s;}
+.fg input[type=text]:focus,.fg select:focus{outline:none;border-color:var(--dark);}
+.fg input[type=range]{width:100%;accent-color:var(--dark);margin-top:4px;}
+.fv{font-size:13px;font-weight:500;color:var(--dark);}
+
+/* CONTROLS */
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:1.5rem;}
+.bsearch{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--dark);color:#fff;font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s;letter-spacing:.02em;}
+.bsearch:hover{background:var(--mid);}
+.bsearch:disabled{background:var(--muted);cursor:not-allowed;}
+.bar{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;background:transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-size:13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.bar:hover{border-color:var(--dark);color:var(--dark);}
+.bar.on{border-color:#16A34A;color:#16A34A;font-weight:600;}
+.cdpill{font-size:12px;color:var(--muted);display:none;align-items:center;gap:5px;}
+.lu{font-size:12px;color:var(--light-muted);display:none;align-items:center;gap:5px;margin-left:auto;}
+
+/* RESULTS HEADER */
+.rh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.rhcount{font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;}
+.bnew{background:#DCFCE7;color:#15803D;}
+.bdrop{background:#FEF3C7;color:#B45309;}
+.bsold{background:#F1F5F9;color:#64748B;}
+.bhot{background:#FEE2E2;color:#B91C1C;}
+
+/* CARDS */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:2rem;}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s;}
+.ccard:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.08);border-color:var(--border-h);}
+.ccard.sold{opacity:.4;pointer-events:none;}
+.cstripe{height:4px;width:100%;}
+.cbody{padding:14px 16px 12px;}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.ctitle{font-family:var(--fd);font-size:19px;font-weight:800;letter-spacing:-.2px;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;flex:1;min-width:0;}
+.csub{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.cpricerow{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+.cprice{font-family:var(--fd);font-size:28px;font-weight:900;letter-spacing:-.5px;color:var(--dark);}
+.cprice.sp{text-decoration:line-through;color:var(--muted);}
+.cprev{font-size:13px;color:var(--muted);text-decoration:line-through;}
+.cmiles{font-size:13px;color:var(--muted);}
+.cfoot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;gap:6px;}
+.csrc{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--surface);color:var(--muted);}
+.cdealer{font-size:12px;color:var(--muted);}
+.clink{font-size:13px;font-weight:600;color:var(--dark);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s;}
+.clink:hover{color:var(--accent);}
+.cdays{font-size:11px;color:var(--light-muted);}
+.cbadge{flex-shrink:0;margin-left:8px;}
+
+/* STATES */
+.empty{text-align:center;padding:4.5rem 2rem;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);}
+.empty i{font-size:44px;color:var(--border);display:block;margin-bottom:14px;}
+.empty h3{font-family:var(--fd);font-size:26px;font-weight:900;color:var(--dark);margin-bottom:8px;}
+.empty p{font-size:14px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6;}
+.errbox{background:#FFF8F8;border:1px solid #FECACA;border-radius:var(--r);padding:14px 16px;margin-bottom:1.25rem;font-size:14px;color:#B91C1C;display:flex;align-items:flex-start;gap:10px;}
+.skel{background:linear-gradient(90deg,#f0f0ee 25%,#e6e6e4 50%,#f0f0ee 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--rl);border:1px solid var(--border);height:220px;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin{animation:spin .9s linear infinite;display:inline-block;}
+
+/* SOLD DIVIDER */
+.sdiv{display:flex;align-items:center;gap:12px;margin:2rem 0 14px;}
+.sline{flex:1;height:1px;background:var(--border);}
+.slabel{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);margin-top:2rem;}
+.fi{max-width:1260px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:2rem;}
+.flogo{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--dark);}
+.flogo span{color:var(--accent);}
+.fsub{font-size:12px;color:var(--muted);margin-top:4px;}
+.flinks{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+.flinks a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .15s;}
+.flinks a:hover{color:var(--dark);}
+.fnote{font-size:12px;color:var(--light-muted);max-width:440px;line-height:1.7;}
+
+@media(max-width:600px){
+  h1.ht{font-size:56px;letter-spacing:-1px;}
+  .cgrid{grid-template-columns:1fr;}
+  .fgrid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-i">
+    <a href="/" class="logo"><span class="logo-r">German</span>Auto<span class="logo-l">Finder</span></a>
+    <span class="nav-tag">NJ &middot; NY &middot; CT</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-i">
+    <div class="hero-eye">Live &middot; Tri-State &middot; German</div>
+    <h1 class="ht">FIND YOUR<br><span class="a">GERMAN.</span></h1>
+    <p class="hdesc">From the <strong>Golf GTI</strong> to the <strong>RS6 Avant</strong> &mdash; every German listing in New Jersey, New York, and Connecticut. Searched live. New arrivals flagged. <strong>Sold cars tracked.</strong></p>
+    <div class="hbrands">
+      <div class="hbrand">BMW</div>
+      <div class="hbrand">Mercedes-Benz</div>
+      <div class="hbrand">Audi</div>
+      <div class="hbrand">Porsche</div>
+      <div class="hbrand">Volkswagen</div>
+      <div class="hbrand">MINI</div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section class="sec" id="search">
+  <div class="seye">Live Search</div>
+  <div class="stitle">Search listings</div>
+
+  <div class="proxy-notice warn" id="proxy-notice">
+    <i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0"></i>
+    <span>Proxy not configured. Open this file and set <code>PROXY_URL</code> at the top of the script to your Cloudflare Worker URL.</span>
+  </div>
+
+  <div class="btabs" id="btabs"></div>
+
+  <div class="fcard">
+    <div class="fgrid">
+      <div class="fg"><label>Zip code</label><input type="text" id="f-zip" value="07001" maxlength="5" placeholder="07001"></div>
+      <div class="fg"><label>Radius &mdash; <span class="fv" id="lbl-r">50 mi</span></label><input type="range" id="f-radius" min="10" max="150" step="10" value="50"></div>
+      <div class="fg"><label>Max price &mdash; <span class="fv" id="lbl-p">$60,000</span></label><input type="range" id="f-price" min="10000" max="250000" step="5000" value="60000"></div>
+      <div class="fg"><label>From year &mdash; <span class="fv" id="lbl-y">2018</span></label><input type="range" id="f-year" min="2000" max="2025" step="1" value="2018"></div>
+      <div class="fg"><label>Condition</label>
+        <select id="f-cond"><option value="used">Used</option><option value="new">New</option><option value="cpo">CPO / Certified</option></select>
+      </div>
+      <div class="fg"><label>Body type</label>
+        <select id="f-body"><option>Any</option><option>Sedan</option><option>SUV</option><option>Coupe</option><option>Wagon</option><option>Convertible</option><option>Hatchback</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="bsearch" id="bsearch" onclick="fetchListings()"><i class="ti ti-search"></i> Search listings</button>
+    <button class="bar" id="bar" onclick="toggleAR()"><i class="ti ti-refresh"></i> Auto-refresh</button>
+    <span class="cdpill" id="cdpill"><i class="ti ti-clock" style="font-size:13px"></i><span id="cdtxt"></span></span>
+    <span class="lu" id="lu"><i class="ti ti-point-filled" style="font-size:10px;color:#16A34A"></i><span id="lutxt"></span></span>
+  </div>
+
+  <div id="results">
+    <div class="empty">
+      <i class="ti ti-steering-wheel"></i>
+      <h3>Ready to search</h3>
+      <p>Set your filters and click <strong>Search listings</strong> to pull live inventory from across the tri-state area.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fi">
+    <div>
+      <div class="flogo"><span>German</span>AutoFinder</div>
+      <div class="fsub">New Jersey &middot; New York &middot; Connecticut</div>
+      <div class="flinks">
+        <a href="https://www.cargurus.com" target="_blank" rel="noreferrer">CarGurus</a>
+        <a href="https://www.autotrader.com" target="_blank" rel="noreferrer">AutoTrader</a>
+        <a href="https://www.cars.com" target="_blank" rel="noreferrer">Cars.com</a>
+        <a href="https://www.carfax.com" target="_blank" rel="noreferrer">Carfax</a>
+        <a href="https://www.truecar.com" target="_blank" rel="noreferrer">TrueCar</a>
+        <a href="https://www.kbb.com" target="_blank" rel="noreferrer">KBB</a>
+      </div>
+    </div>
+    <p class="fnote">Listings sourced live via web search. GermanAutoFinder does not own, sell, or broker any vehicles. All listings belong to their respective platforms and sellers. Sold status is estimated when a listing disappears between refreshes.</p>
+  </div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  CONFIGURATION — set this to your Cloudflare Worker URL after deploying
+//  e.g.  'https://germanautofinder-proxy.yourname.workers.dev'
+// ─────────────────────────────────────────────────────────────────────────────
+const PROXY_URL = 'PASTE_YOUR_PROXY_URL_HERE';
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const BRANDS = [
+  {id:'all',      name:'All German',    q:'BMW OR Mercedes-Benz OR Audi OR Porsche OR Volkswagen OR MINI'},
+  {id:'bmw',      name:'BMW',           q:'BMW',           color:'#1C69D4'},
+  {id:'mercedes', name:'Mercedes-Benz', q:'Mercedes-Benz', color:'#1A1A1A'},
+  {id:'audi',     name:'Audi',          q:'Audi',          color:'#BB0A21'},
+  {id:'porsche',  name:'Porsche',       q:'Porsche',       color:'#967E36'},
+  {id:'vw',       name:'Volkswagen',    q:'Volkswagen',    color:'#009DE0'},
+  {id:'mini',     name:'MINI',          q:'MINI',          color:'#E3000B'},
+];
+
+const S = {
+  brand:BRANDS[0], zip:'07001', radius:50, maxPrice:60000, minYear:2018, cond:'used', body:'Any',
+  listings:[], prev:[], sold:[],
+  loading:false, error:null, lastFetch:null,
+  ar:false, countdown:0, _cdi:null,
+};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+const fP  = v => '$' + Math.round(+v).toLocaleString();
+const fM  = v => Math.round(+v).toLocaleString() + ' mi';
+const fCd = s => { const m=Math.floor(s/60),sc=s%60; return m+':'+(sc<10?'0':'')+sc; };
+function timeSince(ts) {
+  if(!ts) return '';
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'Updated just now';
+  if(s<3600) return 'Updated '+Math.floor(s/60)+'m ago';
+  return 'Updated '+Math.floor(s/3600)+'h ago';
+}
+function sk(l) {
+  return (l.year||'')+'_'+(l.title||'').toLowerCase().replace(/\s+/g,'-')+'_'+Math.round((l.price||0)/500)*500;
+}
+function brandColor(t) {
+  const s=(t||'').toLowerCase();
+  if(s.includes('bmw')) return '#1C69D4';
+  if(s.includes('mercedes')||s.includes('amg')||s.includes('benz')) return '#1A1A1A';
+  if(s.includes('audi')||/ rs\d/.test(s)||/ s[34567] /.test(s)) return '#BB0A21';
+  if(s.includes('porsche')) return '#967E36';
+  if(s.includes('volkswagen')||s.includes('golf')||s.includes('gti')||s.includes('jetta')||s.includes('passat')||s.includes('tiguan')||s.includes('atlas')) return '#009DE0';
+  if(s.includes('mini')) return '#E3000B';
+  return '#6B7280';
+}
+
+// ── PROXY CHECK ───────────────────────────────────────────────────────────────
+(function checkProxy(){
+  const el = document.getElementById('proxy-notice');
+  if(PROXY_URL && !PROXY_URL.includes('PASTE_YOUR')) {
+    el.className='proxy-notice ok';
+    el.innerHTML='<i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0"></i><span>Proxy connected &mdash; searches are routed securely through your worker.</span>';
+  }
+})();
+
+// ── BRAND TABS ────────────────────────────────────────────────────────────────
+function renderTabs(){
+  document.getElementById('btabs').innerHTML=BRANDS.map(b=>
+    `<button class="btab${S.brand.id===b.id?' active':''}" onclick="setBrand('${b.id}')">${b.name}</button>`
+  ).join('');
+}
+function setBrand(id){ S.brand=BRANDS.find(b=>b.id===id); renderTabs(); }
+
+// ── FILTER BINDINGS ───────────────────────────────────────────────────────────
+function bindFilters(){
+  document.getElementById('f-zip').oninput=e=>S.zip=e.target.value;
+  document.getElementById('f-radius').oninput=e=>{S.radius=+e.target.value;document.getElementById('lbl-r').textContent=e.target.value+' mi';};
+  document.getElementById('f-price').oninput=e=>{S.maxPrice=+e.target.value;document.getElementById('lbl-p').textContent=fP(e.target.value);};
+  document.getElementById('f-year').oninput=e=>{S.minYear=+e.target.value;document.getElementById('lbl-y').textContent=e.target.value;};
+  document.getElementById('f-cond').onchange=e=>S.cond=e.target.value;
+  document.getElementById('f-body').onchange=e=>S.body=e.target.value;
+}
+
+// ── AUTO-REFRESH ──────────────────────────────────────────────────────────────
+function toggleAR(){
+  S.ar=!S.ar;
+  const btn=document.getElementById('bar');
+  if(S.ar){btn.className='bar on';btn.innerHTML='<i class="ti ti-refresh spin"></i> Auto-refresh on';if(S.listings.length>0)startCd();}
+  else{btn.className='bar';btn.innerHTML='<i class="ti ti-refresh"></i> Auto-refresh';stopCd();}
+}
+function startCd(){
+  stopCd(); S.countdown=300;
+  const pill=document.getElementById('cdpill'),txt=document.getElementById('cdtxt');
+  pill.style.display='inline-flex'; txt.textContent='Refreshing in '+fCd(S.countdown);
+  S._cdi=setInterval(()=>{
+    S.countdown--;
+    if(S.countdown<=0){stopCd();fetchListings();}
+    else txt.textContent='Refreshing in '+fCd(S.countdown);
+  },1000);
+}
+function stopCd(){ clearInterval(S._cdi); document.getElementById('cdpill').style.display='none'; }
+
+// ── FETCH ─────────────────────────────────────────────────────────────────────
+async function fetchListings(){
+  if(S.loading) return;
+
+  const proxyReady = PROXY_URL && !PROXY_URL.includes('PASTE_YOUR');
+  if(!proxyReady){
+    document.getElementById('results').innerHTML=
+      `<div class="errbox"><i class="ti ti-alert-circle" style="font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>Proxy not set up yet. Deploy the Cloudflare Worker and paste the URL into <code>PROXY_URL</code> at the top of this file's script.</div></div>`;
+    return;
+  }
+
+  S.loading=true; S.error=null;
+  const prev=[...S.listings];
+  setBusy(true);
+
+  try{
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        system:`You are a live car listing aggregator. Search the web for REAL current car listings and return ONLY a valid JSON array — no preamble, no explanation, no markdown fences or code blocks. Each object must have exactly: {id:string, title:string, price:number, year:number, mileage:number, trim:string, dealer:string, city:string, state:string, source:string, url:string, daysListed:number}. id should be a stable slug from title+price. Return only the JSON array.`,
+        messages:[{role:'user',content:`Search CarGurus, AutoTrader, Cars.com, Carfax, and NJ/NY/CT dealership sites for ${S.brand.q} ${S.cond} cars near zip ${S.zip}, within ${S.radius} miles, under ${fP(S.maxPrice)}, from ${S.minYear} or newer${S.body!=='Any'?', '+S.body+' body':''}. Return 10-16 real current listings as a JSON array only.`}]
+      })
+    });
+
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message||'API error from proxy.');
+
+    const text=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+    const match=text.match(/\[[\s\S]*?\]/);
+    if(!match) throw new Error('No listings returned. Try adjusting your filters or try again.');
+
+    const fresh=JSON.parse(match[0]);
+    if(!Array.isArray(fresh)||fresh.length===0) throw new Error('Search returned no results. Try a larger radius or higher price.');
+
+    const fKeys=new Set(fresh.map(sk));
+    S.sold=prev.filter(l=>!fKeys.has(sk(l)));
+    S.prev=prev; S.listings=fresh; S.lastFetch=Date.now();
+    renderResults();
+    if(S.ar) startCd();
+
+    const lu=document.getElementById('lu'),lutxt=document.getElementById('lutxt');
+    lu.style.display='inline-flex'; lutxt.textContent=timeSince(S.lastFetch);
+    setInterval(()=>lutxt.textContent=timeSince(S.lastFetch),30000);
+
+  }catch(e){
+    document.getElementById('results').innerHTML=
+      `<div class="errbox"><i class="ti ti-alert-circle" style="font-size:18px;flex-shrink:0;margin-top:1px"></i><div>${e.message}</div></div>`;
+  }
+  S.loading=false; setBusy(false);
+}
+
+function setBusy(on){
+  const btn=document.getElementById('bsearch');
+  if(on){
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Searching live&hellip;';
+    document.getElementById('results').innerHTML=
+      `<div class="cgrid">${Array(6).fill('<div class="skel"></div>').join('')}</div>`;
+  } else {
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-search"></i> Search listings';
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderResults(){
+  const pKeys=new Set(S.prev.map(sk));
+  const pPrices=Object.fromEntries(S.prev.map(l=>[sk(l),l.price]));
+  const enriched=S.listings.map(l=>{
+    const k=sk(l),isNew=S.prev.length>0&&!pKeys.has(k);
+    const pP=pPrices[k],isDrop=pP!=null&&l.price<pP,diff=isDrop?pP-l.price:0;
+    const hot=l.daysListed!=null&&l.daysListed<=3&&!isNew;
+    return{...l,isNew,isDrop,diff,hot};
+  });
+  const nNew=enriched.filter(l=>l.isNew).length;
+  const nDrop=enriched.filter(l=>l.isDrop).length;
+  const nHot=enriched.filter(l=>l.hot).length;
+
+  let html=`
+  <div class="rh">
+    <span class="rhcount">${enriched.length} listings</span>
+    ${nNew>0?`<span class="badge bnew"><i class="ti ti-sparkles" style="font-size:11px"></i>${nNew} new</span>`:''}
+    ${nDrop>0?`<span class="badge bdrop"><i class="ti ti-trending-down" style="font-size:11px"></i>${nDrop} price drop</span>`:''}
+    ${S.sold.length>0?`<span class="badge bsold">${S.sold.length} possibly sold</span>`:''}
+    ${nHot>0?`<span class="badge bhot"><i class="ti ti-flame" style="font-size:11px"></i>${nHot} just listed</span>`:''}
+  </div>
+  <div class="cgrid">${enriched.map(l=>card(l,false)).join('')}</div>`;
+
+  if(S.sold.length>0) html+=`
+  <div class="sdiv"><div class="sline"></div><span class="slabel">Possibly sold &mdash; missing from latest search</span><div class="sline"></div></div>
+  <div class="cgrid">${S.sold.map(l=>card(l,true)).join('')}</div>`;
+
+  html+=`<p style="font-size:12px;color:#9CA3AF;line-height:1.6;margin-top:1.5rem">Listings sourced live via web search across CarGurus, AutoTrader, Cars.com, Carfax, and local tri-state dealerships. Cars absent from a subsequent refresh are flagged as possibly sold.</p>`;
+  document.getElementById('results').innerHTML=html;
+}
+
+function card(l,sold){
+  const color=brandColor(l.title);
+  let bHtml='';
+  if(sold)               bHtml=`<span class="badge bsold">Sold</span>`;
+  else if(l.isDrop)      bHtml=`<span class="badge bdrop"><i class="ti ti-trending-down" style="font-size:11px"></i>${fP(l.diff)} drop</span>`;
+  else if(l.isNew)       bHtml=`<span class="badge bnew"><i class="ti ti-sparkles" style="font-size:11px"></i>New listing</span>`;
+  else if(l.hot)         bHtml=`<span class="badge bhot"><i class="ti ti-flame" style="font-size:11px"></i>Just listed</span>`;
+  const url=(l.url||'').startsWith('http')?l.url:'#';
+  return `
+  <div class="ccard${sold?' sold':''}">
+    <div class="cstripe" style="background:${color}"></div>
+    <div class="cbody">
+      <div class="ctop">
+        <p class="ctitle" title="${l.title||''}">${l.title||'Unknown vehicle'}</p>
+        <div class="cbadge">${bHtml}</div>
+      </div>
+      <p class="csub">${[l.trim,l.city&&l.state?l.city+', '+l.state:''].filter(Boolean).join(' &middot; ')||'&nbsp;'}</p>
+      <div class="cpricerow">
+        <span class="cprice${sold?' sp':''}">${fP(l.price||0)}</span>
+        ${l.isDrop&&!sold?`<span class="cprev">${fP((l.price||0)+(l.diff||0))}</span>`:''}
+        <span class="cmiles">${fM(l.mileage||0)}</span>
+      </div>
+      <div class="cfoot">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="csrc">${l.source||'Listing'}</span>
+          ${l.dealer?`<span class="cdealer">${l.dealer}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${l.daysListed?`<span class="cdays">${l.daysListed}d listed</span>`:''}
+          ${url!=='#'?`<a href="${url}" target="_blank" rel="noreferrer" class="clink">View <i class="ti ti-arrow-up-right" style="font-size:13px"></i></a>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderTabs();
+bindFilters();
+</script>
+</body>
+</html>
