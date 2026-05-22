@@ -149,7 +149,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-i">
     <a href="/" class="logo"><span class="logo-r">German</span>Auto<span class="logo-l">Finder</span></a>
@@ -157,7 +156,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-i">
     <div class="hero-eye">Live &middot; Tri-State &middot; German</div>
@@ -174,7 +172,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
   </div>
 </section>
 
-<!-- SEARCH -->
 <section class="sec" id="search">
   <div class="seye">Live Search</div>
   <div class="stitle">Search listings</div>
@@ -217,7 +214,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="fi">
     <div>
@@ -241,7 +237,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
 //  CONFIGURATION — set this to your Cloudflare Worker URL after deploying
 //  e.g.  'https://germanautofinder-proxy.yourname.workers.dev'
 // ─────────────────────────────────────────────────────────────────────────────
-const PROXY_URL = 'PASTE_YOUR_PROXY_URL_HERE';
+const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const BRANDS = [
@@ -291,7 +287,7 @@ function brandColor(t) {
   const el = document.getElementById('proxy-notice');
   if(PROXY_URL && !PROXY_URL.includes('PASTE_YOUR')) {
     el.className='proxy-notice ok';
-    el.innerHTML='<i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0"></i><span>Proxy connected &mdash; searches are routed securely through your worker.</span>';
+    el.innerHTML='<i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0"></i><span>Proxy connected &mdash; searches are routed through CORS public gateway.</span>';
   }
 })();
 
@@ -317,159 +313,3 @@ function bindFilters(){
 function toggleAR(){
   S.ar=!S.ar;
   const btn=document.getElementById('bar');
-  if(S.ar){btn.className='bar on';btn.innerHTML='<i class="ti ti-refresh spin"></i> Auto-refresh on';if(S.listings.length>0)startCd();}
-  else{btn.className='bar';btn.innerHTML='<i class="ti ti-refresh"></i> Auto-refresh';stopCd();}
-}
-function startCd(){
-  stopCd(); S.countdown=300;
-  const pill=document.getElementById('cdpill'),txt=document.getElementById('cdtxt');
-  pill.style.display='inline-flex'; txt.textContent='Refreshing in '+fCd(S.countdown);
-  S._cdi=setInterval(()=>{
-    S.countdown--;
-    if(S.countdown<=0){stopCd();fetchListings();}
-    else txt.textContent='Refreshing in '+fCd(S.countdown);
-  },1000);
-}
-function stopCd(){ clearInterval(S._cdi); document.getElementById('cdpill').style.display='none'; }
-
-// ── FETCH ─────────────────────────────────────────────────────────────────────
-async function fetchListings(){
-  if(S.loading) return;
-
-  const proxyReady = PROXY_URL && !PROXY_URL.includes('PASTE_YOUR');
-  if(!proxyReady){
-    document.getElementById('results').innerHTML=
-      `<div class="errbox"><i class="ti ti-alert-circle" style="font-size:18px;flex-shrink:0;margin-top:1px"></i>
-      <div>Proxy not set up yet. Deploy the Cloudflare Worker and paste the URL into <code>PROXY_URL</code> at the top of this file's script.</div></div>`;
-    return;
-  }
-
-  S.loading=true; S.error=null;
-  const prev=[...S.listings];
-  setBusy(true);
-
-  try{
-    const res=await fetch(PROXY_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        tools:[{type:'web_search_20250305',name:'web_search'}],
-        system:`You are a live car listing aggregator. Search the web for REAL current car listings and return ONLY a valid JSON array — no preamble, no explanation, no markdown fences or code blocks. Each object must have exactly: {id:string, title:string, price:number, year:number, mileage:number, trim:string, dealer:string, city:string, state:string, source:string, url:string, daysListed:number}. id should be a stable slug from title+price. Return only the JSON array.`,
-        messages:[{role:'user',content:`Search CarGurus, AutoTrader, Cars.com, Carfax, and NJ/NY/CT dealership sites for ${S.brand.q} ${S.cond} cars near zip ${S.zip}, within ${S.radius} miles, under ${fP(S.maxPrice)}, from ${S.minYear} or newer${S.body!=='Any'?', '+S.body+' body':''}. Return 10-16 real current listings as a JSON array only.`}]
-      })
-    });
-
-    const data=await res.json();
-    if(data.error) throw new Error(data.error.message||'API error from proxy.');
-
-    const text=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
-    const match=text.match(/\[[\s\S]*?\]/);
-    if(!match) throw new Error('No listings returned. Try adjusting your filters or try again.');
-
-    const fresh=JSON.parse(match[0]);
-    if(!Array.isArray(fresh)||fresh.length===0) throw new Error('Search returned no results. Try a larger radius or higher price.');
-
-    const fKeys=new Set(fresh.map(sk));
-    S.sold=prev.filter(l=>!fKeys.has(sk(l)));
-    S.prev=prev; S.listings=fresh; S.lastFetch=Date.now();
-    renderResults();
-    if(S.ar) startCd();
-
-    const lu=document.getElementById('lu'),lutxt=document.getElementById('lutxt');
-    lu.style.display='inline-flex'; lutxt.textContent=timeSince(S.lastFetch);
-    setInterval(()=>lutxt.textContent=timeSince(S.lastFetch),30000);
-
-  }catch(e){
-    document.getElementById('results').innerHTML=
-      `<div class="errbox"><i class="ti ti-alert-circle" style="font-size:18px;flex-shrink:0;margin-top:1px"></i><div>${e.message}</div></div>`;
-  }
-  S.loading=false; setBusy(false);
-}
-
-function setBusy(on){
-  const btn=document.getElementById('bsearch');
-  if(on){
-    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Searching live&hellip;';
-    document.getElementById('results').innerHTML=
-      `<div class="cgrid">${Array(6).fill('<div class="skel"></div>').join('')}</div>`;
-  } else {
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-search"></i> Search listings';
-  }
-}
-
-// ── RENDER ────────────────────────────────────────────────────────────────────
-function renderResults(){
-  const pKeys=new Set(S.prev.map(sk));
-  const pPrices=Object.fromEntries(S.prev.map(l=>[sk(l),l.price]));
-  const enriched=S.listings.map(l=>{
-    const k=sk(l),isNew=S.prev.length>0&&!pKeys.has(k);
-    const pP=pPrices[k],isDrop=pP!=null&&l.price<pP,diff=isDrop?pP-l.price:0;
-    const hot=l.daysListed!=null&&l.daysListed<=3&&!isNew;
-    return{...l,isNew,isDrop,diff,hot};
-  });
-  const nNew=enriched.filter(l=>l.isNew).length;
-  const nDrop=enriched.filter(l=>l.isDrop).length;
-  const nHot=enriched.filter(l=>l.hot).length;
-
-  let html=`
-  <div class="rh">
-    <span class="rhcount">${enriched.length} listings</span>
-    ${nNew>0?`<span class="badge bnew"><i class="ti ti-sparkles" style="font-size:11px"></i>${nNew} new</span>`:''}
-    ${nDrop>0?`<span class="badge bdrop"><i class="ti ti-trending-down" style="font-size:11px"></i>${nDrop} price drop</span>`:''}
-    ${S.sold.length>0?`<span class="badge bsold">${S.sold.length} possibly sold</span>`:''}
-    ${nHot>0?`<span class="badge bhot"><i class="ti ti-flame" style="font-size:11px"></i>${nHot} just listed</span>`:''}
-  </div>
-  <div class="cgrid">${enriched.map(l=>card(l,false)).join('')}</div>`;
-
-  if(S.sold.length>0) html+=`
-  <div class="sdiv"><div class="sline"></div><span class="slabel">Possibly sold &mdash; missing from latest search</span><div class="sline"></div></div>
-  <div class="cgrid">${S.sold.map(l=>card(l,true)).join('')}</div>`;
-
-  html+=`<p style="font-size:12px;color:#9CA3AF;line-height:1.6;margin-top:1.5rem">Listings sourced live via web search across CarGurus, AutoTrader, Cars.com, Carfax, and local tri-state dealerships. Cars absent from a subsequent refresh are flagged as possibly sold.</p>`;
-  document.getElementById('results').innerHTML=html;
-}
-
-function card(l,sold){
-  const color=brandColor(l.title);
-  let bHtml='';
-  if(sold)               bHtml=`<span class="badge bsold">Sold</span>`;
-  else if(l.isDrop)      bHtml=`<span class="badge bdrop"><i class="ti ti-trending-down" style="font-size:11px"></i>${fP(l.diff)} drop</span>`;
-  else if(l.isNew)       bHtml=`<span class="badge bnew"><i class="ti ti-sparkles" style="font-size:11px"></i>New listing</span>`;
-  else if(l.hot)         bHtml=`<span class="badge bhot"><i class="ti ti-flame" style="font-size:11px"></i>Just listed</span>`;
-  const url=(l.url||'').startsWith('http')?l.url:'#';
-  return `
-  <div class="ccard${sold?' sold':''}">
-    <div class="cstripe" style="background:${color}"></div>
-    <div class="cbody">
-      <div class="ctop">
-        <p class="ctitle" title="${l.title||''}">${l.title||'Unknown vehicle'}</p>
-        <div class="cbadge">${bHtml}</div>
-      </div>
-      <p class="csub">${[l.trim,l.city&&l.state?l.city+', '+l.state:''].filter(Boolean).join(' &middot; ')||'&nbsp;'}</p>
-      <div class="cpricerow">
-        <span class="cprice${sold?' sp':''}">${fP(l.price||0)}</span>
-        ${l.isDrop&&!sold?`<span class="cprev">${fP((l.price||0)+(l.diff||0))}</span>`:''}
-        <span class="cmiles">${fM(l.mileage||0)}</span>
-      </div>
-      <div class="cfoot">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="csrc">${l.source||'Listing'}</span>
-          ${l.dealer?`<span class="cdealer">${l.dealer}</span>`:''}
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          ${l.daysListed?`<span class="cdays">${l.daysListed}d listed</span>`:''}
-          ${url!=='#'?`<a href="${url}" target="_blank" rel="noreferrer" class="clink">View <i class="ti ti-arrow-up-right" style="font-size:13px"></i></a>`:''}
-        </div>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-renderTabs();
-bindFilters();
-</script>
-</body>
-</html>
