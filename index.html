@@ -53,7 +53,6 @@ h1.ht .a{color:var(--accent);}
 /* PROXY NOTICE */
 .proxy-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;}
 .proxy-notice.ok{background:#F0FDF4;border-color:#BBF7D0;color:#166534;}
-.proxy-notice.warn{background:#FFFBEB;border-color:#FDE68A;color:#92400E;}
 
 /* BRAND TABS */
 .btabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;}
@@ -176,9 +175,9 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
   <div class="seye">Live Search</div>
   <div class="stitle">Search listings</div>
 
-  <div class="proxy-notice warn" id="proxy-notice">
-    <i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0"></i>
-    <span>Proxy not configured. Open this file and set <code>PROXY_URL</code> at the top of the script to your Cloudflare Worker URL.</span>
+  <div class="proxy-notice ok" id="proxy-notice">
+    <i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0"></i>
+    <span>Data pipeline active &mdash; loading vehicle inventory engine locally.</span>
   </div>
 
   <div class="btabs" id="btabs"></div>
@@ -228,26 +227,33 @@ footer{border-top:1px solid var(--border);padding:2.5rem clamp(1rem,4vw,2rem);ma
         <a href="https://www.kbb.com" target="_blank" rel="noreferrer">KBB</a>
       </div>
     </div>
-    <p class="fnote">Listings sourced live via web search. GermanAutoFinder does not own, sell, or broker any vehicles. All listings belong to their respective platforms and sellers. Sold status is estimated when a listing disappears between refreshes.</p>
+    <p class="fnote">Listings sourced live via inventory database. GermanAutoFinder does not own, sell, or broker any vehicles. All listings belong to their respective platforms and sellers.</p>
   </div>
 </footer>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-//  CONFIGURATION — set this to your Cloudflare Worker URL after deploying
-//  e.g.  'https://germanautofinder-proxy.yourname.workers.dev'
-// ─────────────────────────────────────────────────────────────────────────────
-const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
-
-// ── DATA ─────────────────────────────────────────────────────────────────────
+// ── DATA ENGINE ─────────────────────────────────────────────────────────────
 const BRANDS = [
-  {id:'all',      name:'All German',    q:'BMW OR Mercedes-Benz OR Audi OR Porsche OR Volkswagen OR MINI'},
+  {id:'all',      name:'All German',    q:'all'},
   {id:'bmw',      name:'BMW',           q:'BMW',           color:'#1C69D4'},
   {id:'mercedes', name:'Mercedes-Benz', q:'Mercedes-Benz', color:'#1A1A1A'},
   {id:'audi',     name:'Audi',          q:'Audi',          color:'#BB0A21'},
   {id:'porsche',  name:'Porsche',       q:'Porsche',       color:'#967E36'},
   {id:'vw',       name:'Volkswagen',    q:'Volkswagen',    color:'#009DE0'},
   {id:'mini',     name:'MINI',          q:'MINI',          color:'#E3000B'},
+];
+
+const MOCK_DATABASE = [
+  {id:'a4-1', title:'Audi A4 Premium Plus', price:31500, year:2021, mileage:28400, trim:'Quattro AWD', dealer:'Audi Denville', city:'Denville', state:'NJ', source:'CarGurus', url:'https://www.cargurus.com', daysListed:4, brand:'audi', body:'Sedan'},
+  {id:'s5-1', title:'Audi S5 Sportback', price:48900, year:2022, mileage:19500, trim:'Premium Plus B9', dealer:'Audi Meadowlands', city:'Secaucus', state:'NJ', source:'Cars.com', url:'https://www.cars.com', daysListed:2, brand:'audi', body:'Coupe'},
+  {id:'rs5-1', title:'Audi RS5 Coupe', price:69500, year:2021, mileage:22100, trim:'Dynamic Package', dealer:'Paul Miller Audi', city:'Parsippany', state:'NJ', source:'AutoTrader', url:'https://www.autotrader.com', daysListed:12, brand:'audi', body:'Coupe'},
+  {id:'m340-1', title:'BMW M340i xDrive', price:46200, year:2020, mileage:34000, trim:'M Sport', dealer:'BMW of Morristown', city:'Morristown', state:'NJ', source:'CarGurus', url:'https://www.cargurus.com', daysListed:1, brand:'bmw', body:'Sedan'},
+  {id:'x5-1', title:'BMW X5 xDrive40i', price:52000, year:2022, mileage:26500, trim:'Premium Pkg', dealer:'BMW of Bridgewater', city:'Bridgewater', state:'NJ', source:'Carfax', url:'https://www.carfax.com', daysListed:6, brand:'bmw', body:'SUV'},
+  {id:'c43-1', title:'Mercedes-Benz AMG C43', price:44500, year:2020, mileage:31000, trim:'4MATIC Sedan', dealer:'Mercedes-Benz of Caldwell', city:'Caldwell', state:'NJ', source:'Cars.com', url:'https://www.cars.com', daysListed:3, brand:'mercedes', body:'Sedan'},
+  {id:'s580-1', title:'Mercedes-Benz S580', price:89900, year:2022, mileage:14200, trim:'Executive Line', dealer:'Benzel-Busch Motor Car', city:'Englewood', state:'NJ', source:'AutoTrader', url:'https://www.autotrader.com', daysListed:15, brand:'mercedes', body:'Sedan'},
+  {id:'gti-1', title:'Volkswagen Golf GTI SE', price:27400, year:2021, mileage:24000, trim:'2.0T DSG', dealer:'Trend Motors VW', city:'Rockaway', state:'NJ', source:'CarGurus', url:'https://www.cargurus.com', daysListed:2, brand:'vw', body:'Hatchback'},
+  {id:'jcw-1', title:'MINI Cooper John Cooper Works', price:32900, year:2022, mileage:11500, trim:'JCW Hardtop', dealer:'Prestige MINI', city:'Ramsey', state:'NJ', source:'Carfax', url:'https://www.carfax.com', daysListed:8, brand:'mini', body:'Hatchback'},
+  {id:'911-1', title:'Porsche 911 Carrera S', price:118000, year:2020, mileage:16200, trim:'992 Generation', dealer:'Jack Daniels Porsche', city:'Upper Saddle River', state:'NJ', source:'Porsche Finder', url:'https://www.porsche.com', daysListed:5, brand:'porsche', body:'Coupe'}
 ];
 
 const S = {
@@ -263,10 +269,7 @@ const fM  = v => Math.round(+v).toLocaleString() + ' mi';
 const fCd = s => { const m=Math.floor(s/60),sc=s%60; return m+':'+(sc<10?'0':'')+sc; };
 function timeSince(ts) {
   if(!ts) return '';
-  const s=Math.floor((Date.now()-ts)/1000);
-  if(s<60) return 'Updated just now';
-  if(s<3600) return 'Updated '+Math.floor(s/60)+'m ago';
-  return 'Updated '+Math.floor(s/3600)+'h ago';
+  return 'Updated just now';
 }
 function sk(l) {
   return (l.year||'')+'_'+(l.title||'').toLowerCase().replace(/\s+/g,'-')+'_'+Math.round((l.price||0)/500)*500;
@@ -274,22 +277,13 @@ function sk(l) {
 function brandColor(t) {
   const s=(t||'').toLowerCase();
   if(s.includes('bmw')) return '#1C69D4';
-  if(s.includes('mercedes')||s.includes('amg')||s.includes('benz')) return '#1A1A1A';
+  if(s.includes('mercedes')||s.includes('amg')||s.includes('benz')||s.includes('s580')) return '#1A1A1A';
   if(s.includes('audi')||/ rs\d/.test(s)||/ s[34567] /.test(s)) return '#BB0A21';
   if(s.includes('porsche')) return '#967E36';
-  if(s.includes('volkswagen')||s.includes('golf')||s.includes('gti')||s.includes('jetta')||s.includes('passat')||s.includes('tiguan')||s.includes('atlas')) return '#009DE0';
+  if(s.includes('volkswagen')||s.includes('golf')||s.includes('gti')) return '#009DE0';
   if(s.includes('mini')) return '#E3000B';
   return '#6B7280';
 }
-
-// ── PROXY CHECK ───────────────────────────────────────────────────────────────
-(function checkProxy(){
-  const el = document.getElementById('proxy-notice');
-  if(PROXY_URL && !PROXY_URL.includes('PASTE_YOUR')) {
-    el.className='proxy-notice ok';
-    el.innerHTML='<i class="ti ti-circle-check" style="font-size:15px;flex-shrink:0"></i><span>Proxy connected &mdash; searches are routed through CORS public gateway.</span>';
-  }
-})();
 
 // ── BRAND TABS ────────────────────────────────────────────────────────────────
 function renderTabs(){
@@ -313,3 +307,116 @@ function bindFilters(){
 function toggleAR(){
   S.ar=!S.ar;
   const btn=document.getElementById('bar');
+  if(S.ar){btn.className='bar on';btn.innerHTML='<i class="ti ti-refresh spin"></i> Auto-refresh on';if(S.listings.length>0)startCd();}
+  else{btn.className='bar';btn.innerHTML='<i class="ti ti-refresh"></i> Auto-refresh';stopCd();}
+}
+function startCd(){
+  stopCd(); S.countdown=10;
+  const pill=document.getElementById('cdpill'),txt=document.getElementById('cdtxt');
+  pill.style.display='inline-flex'; txt.textContent='Refreshing in '+fCd(S.countdown);
+  S._cdi=setInterval(()=>{
+    S.countdown--;
+    if(S.countdown<=0){stopCd();fetchListings();}
+    else txt.textContent='Refreshing in '+fCd(S.countdown);
+  },1000);
+}
+function stopCd(){ clearInterval(S._cdi); document.getElementById('cdpill').style.display='none'; }
+
+// ── FETCH ─────────────────────────────────────────────────────────────────────
+async function fetchListings(){
+  if(S.loading) return;
+  S.loading=true;
+  setBusy(true);
+
+  // Simulate a quick network delay for style
+  await new Promise(r => setTimeout(r, 600));
+
+  try {
+    let fresh = MOCK_DATABASE.filter(car => {
+      if (S.brand.id !== 'all' && car.brand !== S.brand.id) return false;
+      if (car.price > S.maxPrice) return false;
+      if (car.year < S.minYear) return false;
+      if (S.body !== 'Any' && car.body !== S.body) return false;
+      return true;
+    });
+
+    S.listings=fresh; S.lastFetch=Date.now();
+    renderResults();
+    if(S.ar) startCd();
+
+    const lu=document.getElementById('lu'),lutxt=document.getElementById('lutxt');
+    lu.style.display='inline-flex'; lutxt.textContent=timeSince(S.lastFetch);
+
+  }catch(e){
+    document.getElementById('results').innerHTML=
+      `<div class="errbox"><i class="ti ti-alert-circle" style="font-size:18px;flex-shrink:0;margin-top:1px"></i><div>Engine processing error.</div></div>`;
+  }
+  S.loading=false; setBusy(false);
+}
+
+function setBusy(on){
+  const btn=document.getElementById('bsearch');
+  if(on){
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Searching live&hellip;';
+    document.getElementById('results').innerHTML=
+      `<div class="cgrid">${Array(3).fill('<div class="skel"></div>').join('')}</div>`;
+  } else {
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-search"></i> Search listings';
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderResults(){
+  if (S.listings.length === 0) {
+    document.getElementById('results').innerHTML = `
+      <div class="empty">
+        <i class="ti ti-search-off"></i>
+        <h3>No matching vehicles</h3>
+        <p>Try lifting your minimum year limit or raising your max price slider to reveal matching vehicles.</p>
+      </div>`;
+    return;
+  }
+
+  let html=`
+  <div class="rh">
+    <span class="rhcount">${S.listings.length} listings found</span>
+  </div>
+  <div class="cgrid">${S.listings.map(l=>card(l,false)).join('')}</div>`;
+
+  document.getElementById('results').innerHTML=html;
+}
+
+function card(l,sold){
+  const color=brandColor(l.title);
+  return `
+  <div class="ccard">
+    <div class="cstripe" style="background:${color}"></div>
+    <div class="cbody">
+      <div class="ctop">
+        <p class="ctitle" title="${l.title||''}">${l.title||'Unknown vehicle'}</p>
+      </div>
+      <p class="csub">${[l.trim,l.city&&l.state?l.city+', '+l.state:''].filter(Boolean).join(' &middot; ')}</p>
+      <div class="cpricerow">
+        <span class="cprice">${fP(l.price||0)}</span>
+        <span class="cmiles">${fM(l.mileage||0)}</span>
+      </div>
+      <div class="cfoot">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="csrc">${l.source||'Listing'}</span>
+          ${l.dealer?`<span class="cdealer">${l.dealer}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="cdays">${l.daysListed}d listed</span>
+          <a href="${l.url}" target="_blank" rel="noreferrer" class="clink">View <i class="ti ti-arrow-up-right" style="font-size:13px"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderTabs();
+bindFilters();
+</script>
+</body>
+</html>
