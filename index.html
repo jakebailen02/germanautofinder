@@ -355,7 +355,7 @@ async function fetchListings(){
       body:JSON.stringify({
         model:'claude-3-5-sonnet-20241022',
         max_tokens:1000,
-        tools:[],
+        tools:[{type:'web_search_20250305',name:'web_search'}],
         system:`You are a live car listing aggregator. Search the web for REAL current car listings and return ONLY a valid JSON array — no preamble, no explanation, no markdown fences or code blocks. Each object must have exactly: {id:string, title:string, price:number, year:number, mileage:number, trim:string, dealer:string, city:string, state:string, source:string, url:string, daysListed:number}. id should be a stable slug from title+price. Return only the JSON array.`,
         messages:[{role:'user',content:`Search CarGurus, AutoTrader, Cars.com, Carfax, and NJ/NY/CT dealership sites for ${S.brand.q} ${S.cond} cars near zip ${S.zip}, within ${S.radius} miles, under ${fP(S.maxPrice)}, from ${S.minYear} or newer${S.body!=='Any'?', '+S.body+' body':''}. Return 10-16 real current listings as a JSON array only.`}]
       })
